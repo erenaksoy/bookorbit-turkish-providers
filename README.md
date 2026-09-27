@@ -11,8 +11,15 @@ metadata provider plugins:
 
 ## Install
 
-In BookOrbit: **Settings > Metadata > Providers > Provider plugins > Install plugin**, then choose
-`dist/dr.zip`, `dist/kitapyurdu.zip` or `dist/pandora.zip`. Read the source the review step shows you,
+These plugins need a BookOrbit build with metadata provider plugin support. Upstream BookOrbit does not
+have it yet; it lives on the `v3.0.1-dev` branch of [erenaksoy/bookorbit](https://github.com/erenaksoy/bookorbit).
+
+Download `dr.zip`, `kitapyurdu.zip` or `pandora.zip` from the
+[latest release](https://github.com/erenaksoy/bookorbit-turkish-providers/releases/latest), or build
+them yourself (see below).
+
+In BookOrbit: **Settings > Metadata > Providers > Provider plugins > Install plugin**, then choose the
+zip. Read the source the review step shows you,
 because a plugin runs inside the server with full access to it.
 
 Then switch the plugin on and add it to a field rule under **Settings > Metadata > Field Rules**.
