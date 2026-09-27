@@ -12,7 +12,7 @@ metadata provider plugins:
 ## Install
 
 These plugins need a BookOrbit build with metadata provider plugin support. Upstream BookOrbit does not
-have it yet; it lives on the `v3.0.1-dev` branch of [erenaksoy/bookorbit](https://github.com/erenaksoy/bookorbit).
+have it yet; it lives on the `v3.1.1-dev` branch of [erenaksoy/bookorbit](https://github.com/erenaksoy/bookorbit).
 
 Download `dr.zip`, `kitapyurdu.zip` or `pandora.zip` from the
 [latest release](https://github.com/erenaksoy/bookorbit-turkish-providers/releases/latest), or build
