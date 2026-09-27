@@ -5,7 +5,7 @@ import {
   extractNezihSlug,
   parseNezihBookPage,
 } from '../src/nezih/scraper';
-import { buildTitleQueries, filterResultsByTitle, toIsbn13 } from '../src/shared/turkish-bookstore';
+import { buildTitleQueries, filterResultsByTitle, foldName, toIsbn13 } from '../src/shared/turkish-bookstore';
 
 const BOOK_HTML = `
   <ul class="fl breadcrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">
@@ -91,6 +91,12 @@ describe('nezih scraper', () => {
     expect(buildTitleQueries('Victor Hugo - Sefiller', undefined)).toEqual(['Sefiller', 'Victor Hugo']);
     expect(buildTitleQueries('Sefiller', 'Victor Hugo')).toEqual(['Sefiller']);
     expect(buildTitleQueries('  ', undefined)).toEqual([]);
+  });
+
+  it('folds Turkish letters when comparing names', () => {
+    expect(foldName('Oğuz Atay')).toBe(foldName('Oguz ATAY'));
+    expect(foldName('İlber Ortaylı')).toBe('ilber ortayli');
+    expect(foldName('Çağdaş Şükrü')).toBe('cagdas sukru');
   });
 
   it('turns an ISBN-10 into its ISBN-13', () => {

@@ -66,6 +66,14 @@ export interface NamedResult {
   name: string;
 }
 
+/** A name with Turkish letters folded to plain ones, so "Oguz Atay" still matches "Oğuz Atay". */
+export function foldName(value: string): string {
+  return normalizeName(value)
+    .replace(/ı/g, 'i')
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '');
+}
+
 export function normalizeName(value: string): string {
   return trLower(cleanText(value))
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')

@@ -26,6 +26,7 @@ function retryAfterSeconds(header: string | null): number | undefined {
  * A 429 is the one thing that must not be swallowed: it puts the provider in a cooldown, so it is
  * thrown. Everything else (an unreachable host, a refused address, a non-2xx status, a search that was
  * cancelled) is logged and reported as "nothing here", which is what every caller does with it.
+ * `emptyStatuses` are the statuses a site answers when it simply found nothing, reported without a log.
  */
 export async function getOk(
   host: MetadataProviderHost,
@@ -33,10 +34,12 @@ export async function getOk(
   op: string,
   url: string,
   init?: MetadataProviderRequestInit,
+  emptyStatuses: readonly number[] = [],
 ): Promise<Response | null> {
   try {
     const response = await host.fetch(url, init);
     if (response.status === 429) throw host.fail('throttled', 'HTTP 429', retryAfterSeconds(response.headers.get('retry-after')));
+    if (emptyStatuses.includes(response.status)) return null;
     if (!response.ok) {
       host.logger.warn(`[${provider}] [fail] op=${op} status=${response.status} - non-ok response`);
       return null;
