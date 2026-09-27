@@ -1,6 +1,6 @@
 # BookOrbit Turkish providers
 
-Six metadata providers for [BookOrbit](https://github.com/erenaksoy/bookorbit), packaged as
+Seven metadata providers for [BookOrbit](https://github.com/erenaksoy/bookorbit), packaged as
 metadata provider plugins:
 
 | Plugin       | Source                                                     | Provider key        |
@@ -11,13 +11,14 @@ metadata provider plugins:
 | `nezih`      | Nezih (nezih.com.tr), reads public pages                   | `plugin:nezih`      |
 | `dogankitap` | Doğan Kitap (dogankitap.com.tr), publisher's own catalogue | `plugin:dogankitap` |
 | `imge`       | İmge Kitabevi (imge.com.tr), catalogue API                 | `plugin:imge`       |
+| `dost`       | Dost Kitabevi (dostkitabevi.com), reads public pages       | `plugin:dost`       |
 
 ## Install
 
 These plugins need a BookOrbit build with metadata provider plugin support. Upstream BookOrbit does not
 have it yet; it lives on the `v3.1.1-dev` branch of [erenaksoy/bookorbit](https://github.com/erenaksoy/bookorbit).
 
-Download `dr.zip`, `kitapyurdu.zip`, `pandora.zip`, `nezih.zip`, `dogankitap.zip` or `imge.zip` from the
+Download `dr.zip`, `kitapyurdu.zip`, `pandora.zip`, `nezih.zip`, `dogankitap.zip`, `imge.zip` or `dost.zip` from the
 [latest release](https://github.com/erenaksoy/bookorbit-turkish-providers/releases/latest), or build
 them yourself (see below).
 

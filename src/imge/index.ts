@@ -1,6 +1,6 @@
 import type { MetadataProviderCandidate, MetadataProviderHost, MetadataProviderPlugin, MetadataProviderQuery } from '../vendor/plugin-api';
 import { getOk } from '../shared/http';
-import { BROWSER_HEADERS, buildTitleQueries, cleanText, filterResultsByTitle, foldName, toIsbn13 } from '../shared/turkish-bookstore';
+import { BROWSER_HEADERS, buildTitleQueries, cleanText, filterResultsByTitle, preferAuthor, toIsbn13 } from '../shared/turkish-bookstore';
 import {
   buildImgeProductUrl,
   buildImgeSearchUrl,
@@ -56,16 +56,6 @@ function toCandidate(book: ImgeBookData): MetadataProviderCandidate {
   };
 }
 
-// A title also turns up books about it ("Tutunamayanlar" finds a study of it), so when some results
-// are by the requested author, only those are kept. None matching means the name is spelled
-// differently here, and the title alone decides.
-function byAuthor(books: ImgeBookData[], author: string): ImgeBookData[] {
-  const wanted = foldName(author);
-  if (!wanted) return books;
-  const matching = books.filter((book) => book.authors?.some((name) => foldName(name) === wanted));
-  return matching.length > 0 ? matching : books;
-}
-
 // The search matches the title, author and publisher together, so the author narrows a title to its
 // editions; the title alone is the fallback for an author spelled differently.
 async function searchByTitle(query: MetadataProviderQuery, host: MetadataProviderHost, signal: AbortSignal, limit: number): Promise<ImgeBookData[]> {
@@ -73,7 +63,7 @@ async function searchByTitle(query: MetadataProviderQuery, host: MetadataProvide
   for (const title of buildTitleQueries(query.title, query.author)) {
     for (const text of author ? [`${title} ${author}`, title] : [title]) {
       if (signal.aborted) return [];
-      const books = byAuthor(await search(text, host), author);
+      const books = preferAuthor(await search(text, host), author);
       const slugs = filterResultsByTitle(toNamedResults(books), title, limit);
       if (slugs.length > 0) return slugs.map((slug) => books.find((book) => book.providerId === slug)!);
     }

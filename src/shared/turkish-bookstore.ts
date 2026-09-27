@@ -74,6 +74,18 @@ export function foldName(value: string): string {
     .replace(/\p{M}/gu, '');
 }
 
+/**
+ * A title also turns up books about it ("Tutunamayanlar" finds a study of it), so when some results
+ * are by the requested author, only those are kept. None matching means the name is spelled
+ * differently there, and the title alone decides.
+ */
+export function preferAuthor<T extends { authors?: readonly string[] }>(items: readonly T[], author: string | undefined): T[] {
+  const wanted = foldName(author ?? '');
+  if (!wanted) return [...items];
+  const matching = items.filter((item) => item.authors?.some((name) => foldName(name) === wanted));
+  return matching.length > 0 ? matching : [...items];
+}
+
 export function normalizeName(value: string): string {
   return trLower(cleanText(value))
     .replace(/[^\p{L}\p{N}\s]/gu, ' ')
