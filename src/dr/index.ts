@@ -2,6 +2,7 @@ import type { MetadataProviderCandidate, MetadataProviderHost, MetadataProviderP
 import { fetchEach, getOk } from '../shared/http';
 import { BROWSER_HEADERS } from '../shared/turkish-bookstore';
 import { buildDrProductUrl, buildDrSearchUrl, extractDrProductId, extractDrSearchResults, parseDrBookPage, type DrBookData } from './scraper';
+import icon from './icon.png';
 
 const PROVIDER = 'dr';
 const MAX_RESULTS = 5;
@@ -37,6 +38,7 @@ const plugin = {
   version: '1.0.0',
   type: 'dr',
   label: 'D&R',
+  icon,
   description: 'Turkish bookstore (dr.com.tr). Reads public pages.',
   idLinkTemplate: 'https://www.dr.com.tr/kitap/-/urunno={id}',
 

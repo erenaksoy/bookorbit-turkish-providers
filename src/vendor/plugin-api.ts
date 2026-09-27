@@ -105,6 +105,11 @@ export interface MetadataProviderPlugin {
   /** Untranslated English, shown in the provider list and next to every candidate. */
   label: string;
   description?: string;
+  /**
+   * The source's logo, shown next to its name in the provider settings: a base64 `data:` URL of a
+   * PNG, JPEG, GIF, WebP, ICO or SVG image, at most 32768 characters.
+   */
+  icon?: string;
   /** The media this source is worth asking about. Omit to be asked for everything. */
   mediaKinds?: readonly PluginMediaKind[];
   /** Ceiling for one search or lookup, in milliseconds. Defaults to 15 seconds. */

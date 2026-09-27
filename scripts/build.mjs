@@ -28,6 +28,7 @@ for (const type of PLUGINS) {
     minify: true,
     legalComments: 'none',
     alias: { undici: stub, 'encoding-sniffer': stub },
+    loader: { '.png': 'dataurl' },
     logLevel: 'warning',
   });
 

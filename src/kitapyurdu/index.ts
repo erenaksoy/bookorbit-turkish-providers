@@ -9,6 +9,7 @@ import {
   extractKitapyurduSearchResults,
   parseKitapyurduBookPage,
 } from './scraper';
+import icon from './icon.png';
 
 const PROVIDER = 'kitapyurdu';
 const MAX_RESULTS = 5;
@@ -42,6 +43,7 @@ const plugin = {
   version: '1.0.0',
   type: 'kitapyurdu',
   label: 'Kitapyurdu',
+  icon,
   description: 'Turkish bookstore (kitapyurdu.com). Reads public pages.',
   idLinkTemplate: 'https://www.kitapyurdu.com/kitap/-/{id}.html',
 

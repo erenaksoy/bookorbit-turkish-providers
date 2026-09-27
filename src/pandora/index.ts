@@ -12,6 +12,7 @@ import {
   PANDORA_DETAILED_SEARCH_URL,
   parsePandoraProduct,
 } from './scraper';
+import icon from './icon.png';
 
 const PROVIDER = 'pandora';
 const MAX_RESULTS = 5;
@@ -88,6 +89,7 @@ const plugin = {
   version: '1.0.0',
   type: 'pandora',
   label: 'Pandora',
+  icon,
   description: 'Turkish bookstore (pandora.com.tr). Uses its public JSON API.',
   idLinkTemplate: 'https://www.pandora.com.tr/kitap/{id}',
 
