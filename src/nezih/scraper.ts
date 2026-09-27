@@ -1,7 +1,14 @@
 import * as cheerio from 'cheerio';
 import type { CheerioAPI } from 'cheerio';
 
-import { cleanText, descriptionFromHtml, IGNORED_CATEGORIES, mapTurkishLanguage, normalizeIsbn13, trLower } from '../shared/turkish-bookstore';
+import {
+  cleanText,
+  descriptionFromHtml,
+  IGNORED_CATEGORIES,
+  mapTurkishLanguage,
+  normalizeIsbn13,
+  type NamedResult,
+} from '../shared/turkish-bookstore';
 
 export interface NezihBookData {
   providerId?: string;
@@ -13,11 +20,6 @@ export interface NezihBookData {
   isbn13?: string;
   genres?: string[];
   coverUrl?: string;
-}
-
-export interface NezihSearchResult {
-  slug: string;
-  name: string;
 }
 
 const NEZIH_BASE_URL = 'https://www.nezih.com.tr';
@@ -41,8 +43,8 @@ export function extractNezihSlug(value: string): string | undefined {
 
 // The site writes one PRODUCT_DATA entry per result, and only it says which catalogue a product
 // belongs to: a title search also returns toys and stationery.
-export function extractNezihSearchResults(html: string): NezihSearchResult[] {
-  const results: NezihSearchResult[] = [];
+export function extractNezihSearchResults(html: string): NamedResult[] {
+  const results: NamedResult[] = [];
   for (const match of html.matchAll(/PRODUCT_DATA\.push\(JSON\.parse\('((?:[^'\\]|\\.)*)'\)\);/g)) {
     const item = parseProductData(match[1]);
     if (!item) continue;
@@ -53,32 +55,6 @@ export function extractNezihSearchResults(html: string): NezihSearchResult[] {
     if (!results.some((result) => result.slug === slug)) results.push({ slug, name });
   }
   return results;
-}
-
-// A search matches any one word, so keep the books whose name holds every word of the title,
-// exact names first.
-export function filterNezihResultsByTitle(results: readonly NezihSearchResult[], title: string, limit: number): string[] {
-  const wanted = normalizeName(title);
-  const words = wanted.split(' ').filter((word) => word.length > 1);
-  if (words.length === 0) return [];
-  return results
-    .map((result) => ({ result, name: normalizeName(result.name) }))
-    .filter(({ name }) => words.every((word) => name.includes(word)))
-    .sort((a, b) => Number(b.name === wanted) - Number(a.name === wanted) || a.name.length - b.name.length)
-    .slice(0, limit)
-    .map(({ result }) => result.slug);
-}
-
-// The site finds nothing for "Author - Title", so a title carrying its author is tried by its
-// remaining segments, the last first since "Author - Title" is the usual form.
-export function buildNezihTitleQueries(title: string | undefined, author: string | undefined): string[] {
-  const authorKey = normalizeName(author ?? '');
-  const segments = cleanText(title)
-    .split(/\s+[-–—]\s+/)
-    .map(cleanText)
-    .filter(Boolean);
-  const titles = segments.filter((segment) => segments.length < 2 || !authorKey || normalizeName(segment) !== authorKey).reverse();
-  return [...new Set(titles)];
 }
 
 export function parseNezihBookPage(html: string, slug: string): NezihBookData {
@@ -161,13 +137,6 @@ function extractCoverUrl(book: Record<string, unknown>): string | undefined {
   const image = ([] as unknown[]).concat(book.image ?? [])[0];
   const url = asString(image);
   return url && /^https:\/\//.test(url) ? url : undefined;
-}
-
-function normalizeName(value: string): string {
-  return trLower(cleanText(value))
-    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
 }
 
 function asRecord(value: unknown): Record<string, unknown> {

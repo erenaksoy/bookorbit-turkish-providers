@@ -1,12 +1,11 @@
 import {
   buildNezihProductUrl,
   buildNezihSearchUrl,
-  buildNezihTitleQueries,
   extractNezihSearchResults,
   extractNezihSlug,
-  filterNezihResultsByTitle,
   parseNezihBookPage,
 } from '../src/nezih/scraper';
+import { buildTitleQueries, filterResultsByTitle, toIsbn13 } from '../src/shared/turkish-bookstore';
 
 const BOOK_HTML = `
   <ul class="fl breadcrumb" itemscope="" itemtype="https://schema.org/BreadcrumbList">
@@ -82,16 +81,24 @@ describe('nezih scraper', () => {
 
   it('keeps results holding every title word, the exact name first', () => {
     const results = extractNezihSearchResults(SEARCH_HTML);
-    expect(filterNezihResultsByTitle(results, 'Sefiller', 5)).toEqual(['sefiller-55320', 'sefiller-kisaltilmis-metin']);
-    expect(filterNezihResultsByTitle(results, 'Sefiller', 1)).toEqual(['sefiller-55320']);
-    expect(filterNezihResultsByTitle(results, 'Hayvan Çiftliği', 5)).toEqual([]);
+    expect(filterResultsByTitle(results, 'Sefiller', 5)).toEqual(['sefiller-55320', 'sefiller-kisaltilmis-metin']);
+    expect(filterResultsByTitle(results, 'Sefiller', 1)).toEqual(['sefiller-55320']);
+    expect(filterResultsByTitle(results, 'Hayvan Çiftliği', 5)).toEqual([]);
   });
 
   it('never puts the author into a query', () => {
-    expect(buildNezihTitleQueries('Victor Hugo - Sefiller', 'Victor Hugo')).toEqual(['Sefiller']);
-    expect(buildNezihTitleQueries('Victor Hugo - Sefiller', undefined)).toEqual(['Sefiller', 'Victor Hugo']);
-    expect(buildNezihTitleQueries('Sefiller', 'Victor Hugo')).toEqual(['Sefiller']);
-    expect(buildNezihTitleQueries('  ', undefined)).toEqual([]);
+    expect(buildTitleQueries('Victor Hugo - Sefiller', 'Victor Hugo')).toEqual(['Sefiller']);
+    expect(buildTitleQueries('Victor Hugo - Sefiller', undefined)).toEqual(['Sefiller', 'Victor Hugo']);
+    expect(buildTitleQueries('Sefiller', 'Victor Hugo')).toEqual(['Sefiller']);
+    expect(buildTitleQueries('  ', undefined)).toEqual([]);
+  });
+
+  it('turns an ISBN-10 into its ISBN-13', () => {
+    expect(toIsbn13('6052959755')).toBe('9786052959756');
+    expect(toIsbn13('605090028X')).toBe('9786050900286');
+    expect(toIsbn13('9786052959756')).toBe('9786052959756');
+    expect(toIsbn13('9786052959750')).toBeUndefined();
+    expect(toIsbn13('12345')).toBeUndefined();
   });
 
   it('extracts slugs from urls and bare slugs', () => {

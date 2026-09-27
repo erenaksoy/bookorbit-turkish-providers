@@ -7,7 +7,7 @@ import { build } from 'esbuild';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const stub = join(root, 'scripts', 'unused-network-stub.mjs');
-const PLUGINS = ['dr', 'kitapyurdu', 'pandora', 'nezih'];
+const PLUGINS = ['dr', 'kitapyurdu', 'pandora', 'nezih', 'dogankitap'];
 const MAX_FILE_BYTES = 512 * 1024;
 const MAX_UPLOAD_BYTES = 1024 * 1024;
 

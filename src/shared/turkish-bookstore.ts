@@ -52,6 +52,57 @@ export function normalizeIsbn13(raw: string | null | undefined): string | undefi
   return sum % 10 === 0 ? digits : undefined;
 }
 
+/** Turns an ISBN-10 into its ISBN-13, the form bookstore barcodes use. */
+export function toIsbn13(isbn: string): string | undefined {
+  if (isbn.length === 13) return normalizeIsbn13(isbn);
+  if (!/^\d{9}[\dX]$/i.test(isbn)) return undefined;
+  const stem = `978${isbn.slice(0, 9)}`;
+  const sum = [...stem].reduce((total, digit, index) => total + Number(digit) * (index % 2 === 0 ? 1 : 3), 0);
+  return `${stem}${(10 - (sum % 10)) % 10}`;
+}
+
+export interface NamedResult {
+  slug: string;
+  name: string;
+}
+
+export function normalizeName(value: string): string {
+  return trLower(cleanText(value))
+    .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
+ * Keeps the results whose name holds every word of the title, exact names first. For sites whose
+ * search matches any one word, or matches inside other titles.
+ */
+export function filterResultsByTitle(results: readonly NamedResult[], title: string, limit: number): string[] {
+  const wanted = normalizeName(title);
+  const words = wanted.split(' ').filter((word) => word.length > 1);
+  if (words.length === 0) return [];
+  return results
+    .map((result) => ({ result, name: normalizeName(result.name) }))
+    .filter(({ name }) => words.every((word) => name.includes(word)))
+    .sort((a, b) => Number(b.name === wanted) - Number(a.name === wanted) || a.name.length - b.name.length)
+    .slice(0, limit)
+    .map(({ result }) => result.slug);
+}
+
+/**
+ * The titles to search for, without the author: a title carrying its author ("Author - Title") is
+ * tried by its remaining segments, the last first since that is the usual form.
+ */
+export function buildTitleQueries(title: string | undefined, author: string | undefined): string[] {
+  const authorKey = normalizeName(author ?? '');
+  const segments = cleanText(title)
+    .split(/\s+[-\u2013\u2014]\s+/)
+    .map(cleanText)
+    .filter(Boolean);
+  const titles = segments.filter((segment) => segments.length < 2 || !authorKey || normalizeName(segment) !== authorKey).reverse();
+  return [...new Set(titles)];
+}
+
 export function descriptionFromHtml(html: string | null | undefined): string | undefined {
   if (!html) return undefined;
   const text = htmlToPlainText(html, { preserveLineBreaks: true });

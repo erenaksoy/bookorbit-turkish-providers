@@ -1,15 +1,12 @@
 import type { MetadataProviderCandidate, MetadataProviderHost, MetadataProviderPlugin, MetadataProviderQuery } from '../vendor/plugin-api';
 import { fetchEach, getOk } from '../shared/http';
-import { BROWSER_HEADERS, normalizeIsbn13 } from '../shared/turkish-bookstore';
+import { BROWSER_HEADERS, buildTitleQueries, filterResultsByTitle, toIsbn13, type NamedResult } from '../shared/turkish-bookstore';
 import {
   buildNezihProductUrl,
   buildNezihSearchUrl,
-  buildNezihTitleQueries,
   extractNezihSearchResults,
   extractNezihSlug,
-  filterNezihResultsByTitle,
   parseNezihBookPage,
-  type NezihSearchResult,
 } from './scraper';
 import icon from './icon.png';
 
@@ -17,7 +14,7 @@ const PROVIDER = 'nezih';
 const MAX_RESULTS = 5;
 const DELAY_BETWEEN_REQUESTS_MS = 600;
 
-async function searchResults(text: string, host: MetadataProviderHost): Promise<NezihSearchResult[]> {
+async function searchResults(text: string, host: MetadataProviderHost): Promise<NamedResult[]> {
   const response = await getOk(host, PROVIDER, 'search', buildNezihSearchUrl(text), { headers: BROWSER_HEADERS });
   return response ? extractNezihSearchResults(await response.text()) : [];
 }
@@ -41,14 +38,6 @@ async function fetchBySlug(slug: string, host: MetadataProviderHost): Promise<Me
     coverUrl: data.coverUrl,
     sourceUrl: url,
   };
-}
-
-function toIsbn13(isbn: string): string | undefined {
-  if (isbn.length === 13) return normalizeIsbn13(isbn);
-  if (isbn.length !== 10) return undefined;
-  const stem = `978${isbn.slice(0, 9)}`;
-  const sum = [...stem].reduce((total, digit, index) => total + Number(digit) * (index % 2 === 0 ? 1 : 3), 0);
-  return `${stem}${(10 - (sum % 10)) % 10}`;
 }
 
 async function searchByIsbn(
@@ -82,9 +71,9 @@ const plugin = {
     }
 
     let slugs: string[] = [];
-    for (const title of buildNezihTitleQueries(query.title, query.author)) {
+    for (const title of buildTitleQueries(query.title, query.author)) {
       if (signal.aborted) break;
-      slugs = filterNezihResultsByTitle(await searchResults(title, host), title, limit);
+      slugs = filterResultsByTitle(await searchResults(title, host), title, limit);
       if (slugs.length > 0) break;
     }
     return fetchEach(slugs, host, signal, DELAY_BETWEEN_REQUESTS_MS, (slug) => fetchBySlug(slug, host));
